@@ -24,7 +24,7 @@ class GetPromptResponse(BaseModel):
     text: str
     success: bool
     reason: str
-    recommend_prompts: List[str]
+    recommend_prompts: List[str] = []
 
     class Config:
         description = "GetPrompt Response"
