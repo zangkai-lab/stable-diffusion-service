@@ -23,5 +23,7 @@ setup(
         "uvicorn",
         "fastapi",
         "pydantic",
+        "requests",
+        "python-dotenv",
     ],
 )
