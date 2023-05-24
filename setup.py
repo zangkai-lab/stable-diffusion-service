@@ -17,7 +17,7 @@ setup(
     packages=find_packages(exclude=("tests",)),
     include_package_data=True,
     # 暴露为命令行工具
-    entry_points={"console_scripts": ["sds = stable_diffusion_service.launch:main"]},
+    entry_points={"console_scripts": ["sds = stable-diffusion-service.launch:main"]},
     install_requires=[
         "click",
         "uvicorn",
