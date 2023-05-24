@@ -17,8 +17,5 @@ class HealthResponse(BaseModel):
 
 
 async def health_check_handler(req: HealthRequest) -> HealthResponse:
-    if req.msg is not None:
-        return HealthResponse(status="I am ok! still alive!")
-    else:
-        raise HTTPException(status_code=400, detail="Invalid request")
+    return HealthResponse(status="I am ok! still alive!")
 
