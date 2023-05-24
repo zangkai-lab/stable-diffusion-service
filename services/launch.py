@@ -19,7 +19,7 @@ def main() -> None:
 def run(port: int) -> None:
     """Run the service."""
     uvicorn.run(
-        "stable_diffusion_service.services.apis:app",
+        "services.apis:app",
         host="0.0.0.0",
         port=port,
     )
