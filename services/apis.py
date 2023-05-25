@@ -9,9 +9,13 @@ from prompt import GetPromptResponse
 from prompt import translate_text_baidu
 
 from txt2img import txt2imgSDRequest
-from txt2img import txt2imgSDRun
+from txt2img import txt2img_run
+from txt2img import txt2img_initialize
+
+from modules.client import HttpClient
 
 app = FastAPI()
+http_client = HttpClient()
 
 
 # 健康检查接口，必须有参数输入
@@ -35,4 +39,19 @@ def get_prompt(req: GetPromptRequest) -> GetPromptResponse:
 
 @app.get("/txt2img", responses={200: {"model": Response}})
 def txt2img(req: txt2imgSDRequest) -> Response:
-    return await txt2imgSDRun(req)
+    return await txt2img_run(req)
+
+
+@app.on_event("startup")
+async def startup() -> None:
+    # 启动http客户端
+    http_client.start()
+    # 初始化txt2img
+    txt2img_initialize()
+    print("> Server is Ready!")
+
+
+# 优雅的关闭服务器
+@app.on_event("shutdown")
+async def shutdown() -> None:
+    await http_client.stop()

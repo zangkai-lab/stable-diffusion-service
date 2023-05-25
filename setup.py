@@ -28,5 +28,6 @@ setup(
         "numpy",
         "torch",
         "Pillow",
+        "aiohttp",
     ],
 )

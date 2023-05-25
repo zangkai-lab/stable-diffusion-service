@@ -3,10 +3,19 @@ from fastapi import Response
 
 from .models import txt2imgSDRequest
 from .utils import get_bytes_from_diffusion
+
 from modules.apis import APIs
+from modules.apis import api_pool
 
 
-async def txt2imgSDRun(data: txt2imgSDRequest, **kwargs) -> Response:
+def txt2img_initialize() -> None:
+    # apipool init
+    api_pool.init(APIs.SD, init_sd)
+
+
+async def txt2img_run(data: txt2imgSDRequest, **kwargs) -> Response:
+    # apipool init
+
     # load model
     m = get_sd_from(APIs.SD, data)
     # inference
