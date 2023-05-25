@@ -25,5 +25,8 @@ setup(
         "pydantic",
         "requests",
         "python-dotenv",
+        "numpy",
+        "torch",
+        "Pillow",
     ],
 )

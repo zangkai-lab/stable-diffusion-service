@@ -16,6 +16,3 @@ class HealthResponse(BaseModel):
         description = "Health Response"
 
 
-async def health_check_handler(req: HealthRequest) -> HealthResponse:
-    return HealthResponse(status="I am ok! still alive!")
-

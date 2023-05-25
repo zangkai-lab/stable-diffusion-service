@@ -1,12 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 
-from .health import HealthRequest
-from .health import HealthResponse
-from .health import health_check_handler
+from health import HealthRequest
+from health import HealthResponse
+from health import health_check_handler
 
-from .prompt import GetPromptRequest
-from .prompt import GetPromptResponse
-from .prompt import translate_text_baidu
+from prompt import GetPromptRequest
+from prompt import GetPromptResponse
+from prompt import translate_text_baidu
+
+from txt2img import txt2imgSDRequest
+from txt2img import txt2imgSDRun
 
 app = FastAPI()
 
@@ -28,3 +31,8 @@ def get_prompt(req: GetPromptRequest) -> GetPromptResponse:
             return GetPromptResponse(text="", success=False, reason=str(e))
     else:
         return GetPromptResponse(text=req.text, success=True, reason="")
+
+
+@app.get("/txt2img", responses={200: {"model": Response}})
+def txt2img(req: txt2imgSDRequest) -> Response:
+    return await txt2imgSDRun(req)
