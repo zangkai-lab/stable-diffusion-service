@@ -98,6 +98,7 @@ class DDPInfo(NamedTuple):
     local_rank: int
 
 
+# 获取分布式数据并行的信息
 def get_ddp_info() -> Optional[DDPInfo]:
     if "RANK" in os.environ and "WORLD_SIZE" in os.environ:
         rank = int(os.environ["RANK"])

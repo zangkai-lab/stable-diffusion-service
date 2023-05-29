@@ -1,11 +1,14 @@
-from typing import Any, Dict, List, Optional, OrderedDict, Type, TypeVar, Union
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 from abc import ABCMeta, abstractmethod
+from collections import OrderedDict
 
 from .utils import shallow_copy_dict
 from .mixins import IBlock
 from .mixins import IData
 from .mixins import ISerializable
+from .mixins import DLConfig
 from .utils import safe_execute
+from .utils import get_ddp_info
 
 
 TBlock = TypeVar("TBlock", bound="IBlock")
@@ -29,40 +32,40 @@ def check_requirement(block: "IBlock", previous: Dict[str, "IBlock"]) -> None:
             )
 
 
-# class Block(IBlock):
-#     data: Optional[IData]
-#     training_workspace: Optional[str]
-#     serialize_folder: Optional[str]
-#     previous: Dict[str, "Block"]
-#
-#     # optional callbacks
-#
-#     def process_defaults(self, _defaults: OrderedDict) -> None:
-#         pass
-#
-#     def run(self, data: IData, _defaults: OrderedDict, **kwargs: Any) -> None:
-#         pass
-#
-#     def save_extra(self, folder: str) -> None:
-#         pass
-#
-#     def load_from(self, folder: str) -> None:
-#         pass
-#
-#     # api
-#
-#     @property
-#     def ddp(self) -> bool:
-#         return get_ddp_info() is not None
-#
-#     @property
-#     def local_rank(self) -> Optional[int]:
-#         ddp_info = get_ddp_info()
-#         return None if ddp_info is None else ddp_info.local_rank
-#
-#     @property
-#     def is_local_rank_0(self) -> bool:
-#         return not self.ddp or self.local_rank == 0
+class Block(IBlock):
+    data: Optional[IData]
+    training_workspace: Optional[str]
+    serialize_folder: Optional[str]
+    previous: Dict[str, "Block"]
+
+    # optional callbacks
+
+    def process_defaults(self, _defaults: OrderedDict) -> None:
+        pass
+
+    def run(self, data: IData, _defaults: OrderedDict, **kwargs: Any) -> None:
+        pass
+
+    def save_extra(self, folder: str) -> None:
+        pass
+
+    def load_from(self, folder: str) -> None:
+        pass
+
+    # api
+
+    @property
+    def ddp(self) -> bool:
+        return get_ddp_info() is not None
+
+    @property
+    def local_rank(self) -> Optional[int]:
+        ddp_info = get_ddp_info()
+        return None if ddp_info is None else ddp_info.local_rank
+
+    @property
+    def is_local_rank_0(self) -> bool:
+        return not self.ddp or self.local_rank == 0
 
 
 class IPipeline(ISerializable["IPipeline"], metaclass=ABCMeta):
