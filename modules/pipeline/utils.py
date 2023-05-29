@@ -2,10 +2,20 @@
 # 这些信息通常包括类的成员、文档字符串、源代码、规格以及函数的参数等
 import os
 import inspect
+import json
 import torch
 import numpy as np
+import copy
+import torch.nn as nn
+import torch.nn.functional as F
 
-from typing import Any, Callable, Dict, Protocol, TypeVar, Optional, NamedTuple
+from typing import Any, Callable, Dict, Protocol, TypeVar, Optional, NamedTuple, Union, List
+
+SCORES_FILE = "scores.json"
+
+tensor_dict_type = Dict[str, Union[torch.Tensor, Any]]
+np_dict_type = Dict[str, Union[np.ndarray, Any]]
+arr_type = Union[np.ndarray, torch.Tensor]
 
 
 def shallow_copy_dict(d: dict) -> dict:
@@ -111,3 +121,86 @@ def get_ddp_info() -> Optional[DDPInfo]:
 def is_local_rank_0() -> bool:
     ddp_info = get_ddp_info()
     return ddp_info is None or ddp_info.local_rank == 0
+
+
+def fix_denormal_states(
+    states: tensor_dict_type,
+    *,
+    eps: float = 1.0e-32,
+    verbose: bool = False,
+) -> tensor_dict_type:
+    new_states = shallow_copy_dict(states)
+    num_total = num_denormal_total = 0
+    for k, v in states.items():
+        if not v.is_floating_point():
+            continue
+        num_total += v.numel()
+        denormal = (v != 0) & (v.abs() < eps)
+        num_denormal = denormal.sum().item()
+        num_denormal_total += num_denormal
+        if num_denormal > 0:
+            new_states[k][denormal] = v.new_zeros(num_denormal)
+    if verbose:
+        print(f"denormal ratio : {num_denormal_total / num_total:8.6f}")
+    return new_states
+
+
+def get_clones(
+    module: nn.Module,
+    n: int,
+    *,
+    return_list: bool = False,
+) -> Union[nn.ModuleList, List[nn.Module]]:
+    module_list = [module]
+    for _ in range(n - 1):
+        module_list.append(copy.deepcopy(module))
+    if return_list:
+        return module_list
+    return nn.ModuleList(module_list)
+
+
+def get_world_size() -> int:
+    ddp_info = get_ddp_info()
+    return 1 if ddp_info is None else ddp_info.world_size
+
+
+def sigmoid(arr: arr_type) -> arr_type:
+    if isinstance(arr, np.ndarray):
+        return 1.0 / (1.0 + np.exp(-arr))
+    return torch.sigmoid(arr)
+
+
+def softmax(arr: arr_type) -> arr_type:
+    if isinstance(arr, np.ndarray):
+        logits = arr - np.max(arr, axis=1, keepdims=True)
+        exp = np.exp(logits)
+        return exp / exp.sum(1, keepdims=True)
+    return F.softmax(arr, dim=1)
+
+
+def to_device(
+    batch: tensor_dict_type,
+    device: torch.device,
+    **kwargs: Any,
+) -> tensor_dict_type:
+    return {
+        k: v.to(device, **kwargs)
+        if isinstance(v, torch.Tensor)
+        else [
+            vv.to(device, **kwargs) if isinstance(vv, torch.Tensor) else vv for vv in v
+        ]
+        if isinstance(v, list)
+        else v
+        for k, v in batch.items()
+    }
+
+
+def is_string(arr: np.ndarray) -> bool:
+    return np.issubdtype(arr.dtype, str)
+
+
+def np_batch_to_tensor(np_batch: np_dict_type) -> tensor_dict_type:
+    return {
+        k: v if not isinstance(v, np.ndarray) or is_string(v) else to_torch(v)
+        for k, v in np_batch.items()
+    }

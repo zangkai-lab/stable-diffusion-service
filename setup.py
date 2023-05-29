@@ -29,5 +29,9 @@ setup(
         "torch",
         "Pillow",
         "aiohttp",
+        "onnx",
+        "onnx-simplifier",
+        "accelerate",
+        "tqdm",
     ],
 )
