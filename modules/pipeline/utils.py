@@ -1,7 +1,11 @@
 # inspect是Python的内建模块，它提供了很多有用的函数来帮助获取对象的信息，比如模块、类、函数、追踪记录、帧以及协程。
 # 这些信息通常包括类的成员、文档字符串、源代码、规格以及函数的参数等
+import os
 import inspect
-from typing import Any, Callable, Dict, Protocol, TypeVar
+import torch
+import numpy as np
+
+from typing import Any, Callable, Dict, Protocol, TypeVar, Optional, NamedTuple
 
 
 def shallow_copy_dict(d: dict) -> dict:
@@ -62,3 +66,47 @@ def update_dict(src_dict: dict, tgt_dict: dict) -> dict:
         else:
             update_dict(v, tgt_v)
     return tgt_dict
+
+
+def to_numpy(tensor: torch.Tensor) -> np.ndarray:
+    return tensor.detach().cpu().numpy()
+
+
+def is_int(arr: np.ndarray) -> bool:
+    return np.issubdtype(arr.dtype, np.integer)
+
+
+def is_float(arr: np.ndarray) -> bool:
+    return np.issubdtype(arr.dtype, np.floating)
+
+
+def to_standard(arr: np.ndarray) -> np.ndarray:
+    if is_int(arr):
+        arr = arr.astype(np.int64)
+    elif is_float(arr):
+        arr = arr.astype(np.float32)
+    return arr
+
+
+def to_torch(arr: np.ndarray) -> torch.Tensor:
+    return torch.from_numpy(to_standard(arr))
+
+
+class DDPInfo(NamedTuple):
+    rank: int
+    world_size: int
+    local_rank: int
+
+
+def get_ddp_info() -> Optional[DDPInfo]:
+    if "RANK" in os.environ and "WORLD_SIZE" in os.environ:
+        rank = int(os.environ["RANK"])
+        world_size = int(os.environ["WORLD_SIZE"])
+        local_rank = int(os.environ["LOCAL_RANK"])
+        return DDPInfo(rank, world_size, local_rank)
+    return None
+
+
+def is_local_rank_0() -> bool:
+    ddp_info = get_ddp_info()
+    return ddp_info is None or ddp_info.local_rank == 0
