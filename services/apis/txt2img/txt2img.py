@@ -2,7 +2,7 @@ import os
 from typing import Any
 from fastapi import Response
 
-from .models import txt2imgSDRequest
+from .interface import txt2imgSDRequest
 from .utils import get_bytes_from_diffusion
 from .init import init_sd
 

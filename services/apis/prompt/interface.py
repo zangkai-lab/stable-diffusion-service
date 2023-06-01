@@ -1,8 +1,5 @@
 from pydantic import BaseModel
 from typing import List
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 class GetPromptRequest(BaseModel):

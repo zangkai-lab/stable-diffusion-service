@@ -3,6 +3,9 @@ import requests
 import random
 import hashlib
 import string
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 def translate_text_baidu(text: str) -> str:

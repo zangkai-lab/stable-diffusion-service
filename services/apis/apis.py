@@ -1,27 +1,17 @@
 from fastapi import FastAPI, Response
 
-from health import HealthRequest
-from health import HealthResponse
-from health import health_check_handler
+from services.apis.prompt import GetPromptRequest
+from services.apis.prompt import GetPromptResponse
+from services.apis.prompt import translate_text_baidu
 
-from prompt import GetPromptRequest
-from prompt import GetPromptResponse
-from prompt import translate_text_baidu
+from services.apis.txt2img import txt2imgSDRequest
+from services.apis.txt2img import txt2img_run
+from services.apis.txt2img import txt2img_initialize
 
-from txt2img import txt2imgSDRequest
-from txt2img import txt2img_run
-from txt2img import txt2img_initialize
-
-from modules.client import HttpClient
+from services.client.client_http import HttpClient
 
 app = FastAPI()
 http_client = HttpClient()
-
-
-# 健康检查接口，必须有参数输入
-@app.post("/health", responses={200: {"model": HealthResponse}})
-async def health_check(req: HealthRequest) -> HealthResponse:
-    return await health_check_handler(req)
 
 
 # prompt接口，目前就是接百度翻译将中文prompt翻译成英文

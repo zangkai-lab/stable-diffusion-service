@@ -1,6 +1,16 @@
 # Stable-Diffusion-Service
-## Project Goal
-The main objective of this project is to transform all functionalities of 'stabledifusionwebui' into a RESTful API format. This change will make it possible for various frontend interfaces to connect seamlessly, hence improving ease of use.
-## Features
-+ Conversion of all 'stabledifusionwebui' functionalities to RESTful API.
-+ Easy integration with various front-end interfaces.
+## 项目目标
+将stable diffusion的能力封装成服务端，方便个性化的接入客户端
+
+## 计划
+### 网络通信模块-services
+- [ ] 多种服务部署模式，模型加载模式
+- [ ] 加入线程池，解决并发请求问题
+- [ ] 以文生图和图生图为核心的接口
+
+### 模型的下载、加载与调用-models
+- [ ] 模型的下载
+- [ ] 模型的加载
+- [ ] 模型的调用
+
+
