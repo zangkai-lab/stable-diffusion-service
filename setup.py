@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
-PACKAGE_NAME = "stable-diffusion-service"
+PACKAGE_NAME = "stable-apis-service"
 VERSION = "0.0.1"
-DESCRIPTION = "A easy-to-use service for stable diffusion."
+DESCRIPTION = "A easy-to-use service for stable apis."
 
 setup(
     name=PACKAGE_NAME,
@@ -12,7 +12,7 @@ setup(
     author="zangkai-lab",
     author_email="erickant505@gmail.com",
     long_description_content_type="text/markdown",
-    keywords="stable diffusion",
+    keywords="stable apis",
 
     packages=find_packages(exclude=("tests",)),
     include_package_data=True,
