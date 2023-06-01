@@ -2,9 +2,11 @@ import json
 
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, Generic, Type, TypeVar
+from typing import Any, Dict, Generic, Type, TypeVar, Callable
 
 from tools.bases.register import WithRegister
+from tools.bases.register import register_core
+from tools.bases.register import TRegister
 from tools.bases.dataclass import DataClassBase
 from tools.utils.copy import shallow_copy_dict
 from tools.utils.type import np_dict_type
@@ -16,6 +18,7 @@ TSerializableArrays = TypeVar(
     bound="ISerializableArrays",
     covariant=True,
 )
+TSDataClass = TypeVar("TSDataClass", bound="ISerializableDataClass", covariant=True)
 
 
 @dataclass
@@ -66,6 +69,60 @@ class ISerializable(WithRegister, Generic[TSerializable], metaclass=ABCMeta):
         copied = self.__class__()  # self.__class__()创建一个新的实例
         copied.from_info(shallow_copy_dict(self.to_info()))
         return copied
+
+
+# 用于序列化的数据类, 依赖于注册类
+@dataclass
+class ISerializableDataClass(
+    ISerializable,
+    DataClassBase,
+    Generic[TSDataClass],
+    metaclass=ABCMeta,
+):
+    @classmethod
+    @abstractmethod
+    def d(cls) -> Dict[str, Type["ISerializableDataClass"]]:
+        pass
+
+    def to_info(self) -> Dict[str, Any]:
+        return self.asdict()
+
+    def from_info(self, info: Dict[str, Any]) -> None:
+        for k, v in info.items():
+            setattr(self, k, v)
+
+    @classmethod
+    def get(cls: Type[TRegister], name: str) -> Type[TRegister]:
+        return cls.d()[name]
+
+    @classmethod
+    def has(cls, name: str) -> bool:
+        return name in cls.d()
+
+    @classmethod
+    def register(
+        cls,
+        name: str,
+        *,
+        allow_duplicate: bool = False,
+    ) -> Callable:
+        def before(cls_: Type) -> None:
+            cls_.__identifier__ = name
+
+        return register_core(
+            name,
+            cls.d(),
+            allow_duplicate=allow_duplicate,
+            before_register=before,
+        )
+
+    @classmethod
+    def remove(cls, name: str) -> Callable:
+        return cls.d().pop(name)
+
+    @classmethod
+    def check_subclass(cls, name: str) -> bool:
+        return issubclass(cls.d()[name], cls)
 
 
 class ISerializableArrays(ISerializable, Generic[TSerializableArrays], metaclass=ABCMeta):

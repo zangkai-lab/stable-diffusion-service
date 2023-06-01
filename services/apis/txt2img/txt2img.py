@@ -6,7 +6,7 @@ from .interface import txt2imgSDRequest
 from .init import init_sd
 
 from services.pooling.pool_apis import api_pool
-from tools.enum.APIS import APIs
+from tools.enum.apis import APIs
 from tools.utils.to import get_bytes_from_diffusion
 
 

@@ -3,7 +3,7 @@ import torch
 from typing import Any, Dict, Optional, Protocol
 
 from tools.bases.pooling import ILoadablePool, ILoadableItem
-from tools.enum.APIS import APIs
+from tools.enum.apis import APIs
 
 
 class IAPI:
