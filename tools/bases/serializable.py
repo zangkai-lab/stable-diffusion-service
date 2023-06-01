@@ -7,9 +7,15 @@ from typing import Any, Dict, Generic, Type, TypeVar
 from tools.bases.register import WithRegister
 from tools.bases.dataclass import DataClassBase
 from tools.utils.copy import shallow_copy_dict
+from tools.utils.type import np_dict_type
 
 
 TSerializable = TypeVar("TSerializable", bound="ISerializable", covariant=True)
+TSerializableArrays = TypeVar(
+    "TSerializableArrays",
+    bound="ISerializableArrays",
+    covariant=True,
+)
 
 
 @dataclass
@@ -59,4 +65,19 @@ class ISerializable(WithRegister, Generic[TSerializable], metaclass=ABCMeta):
     def copy(self: TSerializable) -> TSerializable:
         copied = self.__class__()  # self.__class__()创建一个新的实例
         copied.from_info(shallow_copy_dict(self.to_info()))
+        return copied
+
+
+class ISerializableArrays(ISerializable, Generic[TSerializableArrays], metaclass=ABCMeta):
+    @abstractmethod
+    def to_npd(self) -> np_dict_type:
+        pass
+
+    @abstractmethod
+    def from_npd(self, npd: np_dict_type) -> None:
+        pass
+
+    def copy(self: TSerializableArrays) -> TSerializableArrays:
+        copied: TSerializableArrays = super().copy()
+        copied.from_npd(shallow_copy_dict(self.to_npd()))
         return copied
