@@ -8,7 +8,7 @@ from typing import TypeVar
 from typing import Callable
 from typing import Optional
 
-from .utils import sort_dict_by_value
+from tools.utils.sort import sort_dict_by_value
 
 TIME_FORMAT = "%Y-%m-%d_%H-%M-%S-%f"
 TItem = TypeVar("TItem")

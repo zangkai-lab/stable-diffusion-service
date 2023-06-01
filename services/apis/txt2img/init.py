@@ -2,7 +2,7 @@ import os
 
 from functools import partial
 
-from modules.apis import SDVersions
+from tools.enum.APIS import SDVersions
 
 
 def init_sd(init_to_cpu: bool) -> ControlledDiffusionAPI:

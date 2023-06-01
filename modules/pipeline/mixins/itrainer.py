@@ -671,7 +671,7 @@ def get_metrics(
 
 
 class Trainer(ITrainer):
-    model_log_file = "model.txt"
+    model_log_file = "models.txt"
     metrics_log_file = "metrics.txt"
     summary_log_file = "summary.txt"
 
@@ -943,7 +943,7 @@ class Trainer(ITrainer):
         loss_kw: Dict[str, Any] = {}
         for callback in self.callbacks:
             callback.mutate_train_loss_kwargs(loss_kw, self)
-        # allow model defines its own training step
+        # allow models defines its own training step
         if (
             isinstance(self.model, ModelWithCustomSteps)
             and self.model.custom_train_step
@@ -1160,7 +1160,7 @@ class Trainer(ITrainer):
         if state is None:
             print(
                 "`state` is not initialized, "
-                "latest model will be saved and the recorded score will always be 0"
+                "latest models will be saved and the recorded score will always be 0"
             )
             torch.save(self.model.state_dict(), os.path.join(folder, pt_file))
             with open(os.path.join(folder, SCORES_FILE), "w") as f:
@@ -1198,7 +1198,7 @@ class Trainer(ITrainer):
         checkpoints = get_sorted_checkpoints(folder)
         if not checkpoints:
             if not self.tqdm_settings.in_distributed:
-                print(f"no model file found in {folder}")
+                print(f"no models file found in {folder}")
             return False
         success = False
         for checkpoint in checkpoints:

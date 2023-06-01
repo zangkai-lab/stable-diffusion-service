@@ -13,14 +13,14 @@ class PromptInfo(BaseModel):
 
 
 class txt2imgSDRequest(BaseModel):
-    # model
+    # models
     is_anime: bool = Field(
         True,
         description="anime or not"
     )
     model: str = Field(
         "anime",
-        description="model name"
+        description="models name"
     )
     # seed
     use_seed: bool = Field(

@@ -1,10 +1,10 @@
 import torch
 import numpy as np
+
 from PIL import Image  # Python图像处理库, 图像处理功能
 from io import BytesIO
-from typing import Union
 
-arr_type = Union[np.ndarray, torch.Tensor]
+from tools.utils.type import arr_type
 
 
 def to_uint8(normalized_img: arr_type) -> arr_type:

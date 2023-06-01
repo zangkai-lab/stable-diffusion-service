@@ -62,7 +62,7 @@ class APIMixin:
     def empty_cuda_cache(self) -> None:
         empty_cuda_cache(self.device)
 
-    # model.to(device)和model.half()这样的方法用于改变模型的存储设备和数据类型。
+    # models.to(device)和model.half()这样的方法用于改变模型的存储设备和数据类型。
     # 然而，这并不意味着在执行计算时，所有操作都会按照模型的数据类型进行。
     @property
     def amp_context(self) -> autocast:

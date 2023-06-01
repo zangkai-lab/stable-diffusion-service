@@ -1,13 +1,9 @@
 import torch
 
-from enum import Enum
 from typing import Any, Dict, Optional, Protocol
 
-from .pool import ILoadablePool, ILoadableItem
-
-
-class APIs(str, Enum):
-    SD = "sd"
+from tools.bases.pooling import ILoadablePool, ILoadableItem
+from tools.enum.APIS import APIs
 
 
 class IAPI:

@@ -5,9 +5,9 @@ import numpy as np
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from ..mixins import APIMixin
+from models.mixins import APIMixin
 
-from modules.weights import WeightsPool
+from models.poolings.pool_weights import WeightsPool
 
 
 class DiffusionAPI(APIMixin):
@@ -35,7 +35,7 @@ class DiffusionAPI(APIMixin):
         self.clip_skip = clip_skip
         self.sd_weights = WeightsPool()
         self.current_sd_version = None
-        # extracted the condition model so we can pre-calculate the conditions
+        # extracted the condition models so we can pre-calculate the conditions
         self.cond_model = m.condition_model
         if self.cond_model is not None:
             self.cond_model.eval()

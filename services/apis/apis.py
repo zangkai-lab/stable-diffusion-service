@@ -15,7 +15,7 @@ http_client = HttpClient()
 
 
 # prompt接口，目前就是接百度翻译将中文prompt翻译成英文
-@app.post("/get_prompt", responses={200: {"model": GetPromptResponse}})
+@app.post("/get_prompt", responses={200: {"models": GetPromptResponse}})
 def get_prompt(req: GetPromptRequest) -> GetPromptResponse:
     if req.need_translate:
         try:
@@ -27,7 +27,7 @@ def get_prompt(req: GetPromptRequest) -> GetPromptResponse:
         return GetPromptResponse(text=req.text, success=True, reason="")
 
 
-@app.get("/txt2img", responses={200: {"model": Response}})
+@app.get("/txt2img", responses={200: {"models": Response}})
 def txt2img(req: txt2imgSDRequest) -> Response:
     return await txt2img_run(req)
 

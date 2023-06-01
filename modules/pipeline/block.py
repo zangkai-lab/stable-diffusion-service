@@ -170,7 +170,7 @@ class mode_context:
 
 class eval_context(mode_context):
     """
-    Useful when we need to predict something with our PyTorch model during training.
+    Useful when we need to predict something with our PyTorch models during training.
     """
 
     def __init__(
@@ -331,13 +331,13 @@ class IDLModel(
             if onnx is None:
                 print(
                     "`onnx` is not installed, "
-                    "so the exported onnx model will not be simplified"
+                    "so the exported onnx models will not be simplified"
                 )
                 return self.to(device)
             if onnx_simplify is None or get_input_names is None:
                 print(
                     "`onnx-simplifier` is not installed, "
-                    "so the exported onnx model will not be simplified"
+                    "so the exported onnx models will not be simplified"
                 )
                 return self.to(device)
             try:
@@ -353,12 +353,12 @@ class IDLModel(
                 )
             except Exception as err:
                 if verbose:
-                    print(f"Failed to simplify ONNX model ({err})")
+                    print(f"Failed to simplify ONNX models ({err})")
                 model_simplified = None
                 check = False
             if verbose:
                 tag = " " if check else " not "
-                print(f"Simplified ONNX model is{tag}validated!")
+                print(f"Simplified ONNX models is{tag}validated!")
             if check and model_simplified is not None:
                 onnx.save(model_simplified, export_file)
         return self.to(device)
@@ -1150,7 +1150,7 @@ class SerializeModelBlock(Block):
     def save_extra(self, folder: str) -> None:
         if not self.is_local_rank_0:
             return
-        warn_msg = "no checkpoints found at {}, current model states will be saved"
+        warn_msg = "no checkpoints found at {}, current models states will be saved"
         if self.training_workspace is not None:
             ckpt_folder = os.path.join(self.training_workspace, CHECKPOINTS_FOLDER)
             if get_sorted_checkpoints(ckpt_folder):
@@ -1162,7 +1162,7 @@ class SerializeModelBlock(Block):
             return
         if self.ckpt_folder is None or self.ckpt_scores is None:
             if self.verbose:
-                print("current model states will be saved")
+                print("current models states will be saved")
             self._save_current(folder)
         else:
             any_saved = False

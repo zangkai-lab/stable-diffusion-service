@@ -1,12 +1,8 @@
 import torch
 
-from typing import Dict, Union, Any
-
-from modules.apis import ILoadableItem
-from modules.apis import ILoadablePool
-
-
-tensor_dict_type = Dict[str, Union[torch.Tensor, Any]]
+from tools.bases.pooling import ILoadableItem
+from tools.bases.pooling import ILoadablePool
+from tools.utils.type import tensor_dict_type
 
 
 class Weights(ILoadableItem[tensor_dict_type]):
