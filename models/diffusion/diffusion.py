@@ -5,12 +5,11 @@ import numpy as np
 
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from models.mixins import APIMixin
+from models.pipeline.pipeline_model import ModelPipeline
+from models.pooling.pool_weights import WeightsPool
 
-from models.poolings.pool_weights import WeightsPool
 
-
-class DiffusionAPI(APIMixin):
+class DiffusionAPI(ModelPipeline):
     m: DDPM
     sampler: ISampler
     cond_model: Optional[nn.Module]

@@ -4,18 +4,16 @@ import torch.nn as nn
 from torch.cuda.amp.autocast_mode import autocast
 from typing import Any, Type, TypeVar, Optional, Union
 
-from .utils import is_cpu
-from .utils import empty_cuda_cache
-from .utils import get_device
-
-from modules.pipeline import TrainingPipeline, DLInferencePipeline
+from tools.utils.device import is_cpu
+from tools.utils.device import empty_cuda_cache
+from tools.utils.device import get_device
 
 
 TPipeline = Union[TrainingPipeline, DLInferencePipeline]
-TAPI = TypeVar("TAPI", bound="APIMixin")
+TAPI = TypeVar("TAPI", bound="ModelPipeline")
 
 
-class APIMixin:
+class ModelPipeline:
     m: nn.Module
     device: torch.device
     use_amp: bool  # 自动混合精度
