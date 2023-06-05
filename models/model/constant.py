@@ -24,3 +24,5 @@ STYLIZED_CONTENT_LATENT_KEY = "stylized_content_latent"
 
 INPUT_B_KEY = "input_b"
 LABEL_B_KEY = "labels_b"
+
+TIME_FORMAT = "%Y-%m-%d_%H-%M-%S-%f"
