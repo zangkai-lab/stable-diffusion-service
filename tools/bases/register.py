@@ -1,6 +1,6 @@
 from typing import Any, Callable, Dict, List, Type, Union, TypeVar, Generic, Optional
 
-from tools.utils.copy import shallow_copy_dict
+from tools.utils.icopy import shallow_copy_dict
 from tools.utils.type import configs_type
 from tools.utils.safe import safe_execute
 

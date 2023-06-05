@@ -2,7 +2,7 @@ from abc import ABC
 from dataclasses import fields, asdict, Field
 from typing import Any, Dict, List, TypeVar
 
-from tools.utils.copy import shallow_copy_dict
+from tools.utils.icopy import shallow_copy_dict
 from tools.utils.update import update_dict
 
 

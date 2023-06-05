@@ -21,3 +21,8 @@ def get_ddp_info() -> Optional[DDPInfo]:
 def is_local_rank_0() -> bool:
     ddp_info = get_ddp_info()
     return ddp_info is None or ddp_info.local_rank == 0
+
+
+def get_world_size() -> int:
+    ddp_info = get_ddp_info()
+    return 1 if ddp_info is None else ddp_info.world_size

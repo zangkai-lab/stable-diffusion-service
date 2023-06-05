@@ -1,12 +1,19 @@
+import os
+
 from abc import ABCMeta, abstractmethod
 from typing import List, Optional, Union
 
+from models.pipeline.pipeline_base import Pipeline, Block
+from models.data.data import IData
+from models.pipeline.mixin.mixin_device import DeviceMixin
 
+from tools.utils.type import sample_weights_type
+from tools.utils.ddp import is_local_rank_0
 
 
 class TrainingPipeline(
     Pipeline,
-    _DeviceMixin,
+    DeviceMixin,
     _EvaluationMixin,
     metaclass=ABCMeta,
 ):
@@ -71,7 +78,7 @@ class TrainingPipeline(
         sample_weights: sample_weights_type = None,
         cuda: Optional[Union[int, str]] = None,
     ) -> "TrainingPipeline":
-        # build pipeline
+        # block pipeline
         self.prepare(data, sample_weights)
         # check rank 0
         workspace = self.config.workspace if is_local_rank_0() else None

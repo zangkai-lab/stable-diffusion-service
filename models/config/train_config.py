@@ -5,6 +5,7 @@ from tools.utils.type import configs_type
 from tools.utils.safe import safe_execute
 from tools.enum.precision import PrecisionType
 from tools.bases.serializable import ISerializableDataClass
+from tools.bases.dataclass import DataClassBase
 
 
 trainer_configs: Dict[str, Type["TrainerConfig"]] = {}
@@ -81,3 +82,75 @@ class DLConfig(Config, _DLConfig):
     def sanity_check(self) -> None:  # 安全检测
         if not self.model_name:
             raise ValueError("`model_name` should be provided")
+
+
+
+@dataclass
+class MLEncoderSettings(DataClassBase):
+    """
+    Encoder settings.
+
+    Properties
+    ----------
+    dim (int) : number of different values of this categorical column.
+    methods (str | List[str]) : encoding methods to use for each categorical column.
+        * if List[str] is provided and its length > 1, then multiple encoding methods will be used.
+    method_configs (Dict[str, Any]) : (flattened) configs of the corresponding encoding methods.
+        * even if multiple methods are used, `method_configs` should still be 'flattened'
+
+    """
+
+    dim: int
+    methods: Union[str, List[str]] = "embedding"
+    method_configs: Optional[Dict[str, Any]] = None
+
+    @property
+    def use_one_hot(self) -> bool:
+        if self.methods == "one_hot":
+            return True
+        if isinstance(self.methods, list) and "one_hot" in self.methods:
+            return True
+        return False
+
+    @property
+    def use_embedding(self) -> bool:
+        if self.methods == "embedding":
+            return True
+        if isinstance(self.methods, list) and "embedding" in self.methods:
+            return True
+        return False
+
+
+@dataclass
+class MLGlobalEncoderSettings(DataClassBase):
+    embedding_dim: Optional[int] = None
+    embedding_dropout: Optional[float] = None
+
+
+@dataclass
+@Config.register("ml")
+class MLConfig(DLConfig):
+    """
+    * encoder_settings: used by `Encoder`.
+    * global_encoder_settings: used by `Encoder`.
+    * index_mapping: since there might be some redundant columns, we may need to
+    map the original keys of the `encoder_settings` to the new ones.
+    * infer_encoder_settings: whether infer the `encoder_settings` based on
+    information gathered by `RecognizerBlock`.
+    """
+
+    encoder_settings: Optional[Dict[str, MLEncoderSettings]] = None
+    global_encoder_settings: Optional[MLGlobalEncoderSettings] = None
+    index_mapping: Optional[Dict[str, int]] = None
+    infer_encoder_settings: bool = True
+
+    def from_info(self, info: Dict[str, Any]) -> None:
+        super().from_info(info)
+        if self.encoder_settings is not None:
+            self.encoder_settings = {
+                str_idx: MLEncoderSettings(**settings)
+                for str_idx, settings in self.encoder_settings.items()
+            }
+        ges = self.global_encoder_settings
+        if ges is not None:
+            self.global_encoder_settings = MLGlobalEncoderSettings(**ges)

@@ -8,12 +8,7 @@ from tools.bases.pipeline import IBlock
 from tools.utils.ddp import is_local_rank_0
 
 from models.data.data_bundle import DataBundle
-
-
-class PureFromInfoMixin:
-    def from_info(self, info: Dict[str, Any]) -> None:
-        for k, v in info.items():
-            setattr(self, k, v)
+from tools.mixin.from_info import PureFromInfoMixin
 
 
 class IDataBlock(PureFromInfoMixin, IBlock, ISerializable, metaclass=ABCMeta):

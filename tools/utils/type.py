@@ -16,3 +16,6 @@ sample_weights_type = Optional[Union[np.ndarray, Tuple[np.ndarray, np.ndarray]]]
 tensor_dict_type = Dict[str, Union[torch.Tensor, Any]]  # 可以是torch张量或者任意类型的字典
 np_dict_type = Dict[str, Union[np.ndarray, Any]]  # 可以是numpy数组或者任意类型的字典
 
+forward_results_type = Union[torch.Tensor, tensor_dict_type]
+losses_type = Union[torch.Tensor, tensor_dict_type]
+

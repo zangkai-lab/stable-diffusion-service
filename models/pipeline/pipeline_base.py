@@ -5,12 +5,12 @@ from typing import Any, Dict, List, Optional, Type
 from tools.bases.pipeline import IBlock
 from tools.bases.pipeline import IPipeline
 from tools.bases.pipeline import TPipeline
-from tools.utils.copy import shallow_copy_dict
+from tools.utils.icopy import shallow_copy_dict
 from tools.utils.safe import safe_execute
 from tools.utils.ddp import get_ddp_info
 
 from models.data.data import IData
-from models.train.train_config import DLConfig
+from models.config.train_config import DLConfig
 
 
 class Block(IBlock, ABC):
@@ -20,8 +20,8 @@ class Block(IBlock, ABC):
     * data: only available in `TrainingPipeline`.
     * training_workspace: only available in `TrainingPipeline`, identical to `config.workspace`.
     * serialize_folder: only available in `load` process.
-    * previous: previous building blocks in `build` process. Will be ALL building blocks in `run` process.
-
+    * previous: previous building blocks in `block` process. Will be ALL building blocks in `run` process.
+w
     """
 
     data: Optional[IData]
