@@ -18,6 +18,8 @@ from models.pipeline.block.block_workspace import PrepareWorkplaceBlock, prepare
 from models.pipeline.block.block_stateinfo import ExtractStateInfoBlock
 from models.pipeline.block.block_monitor import BuildMonitorsBlock
 from models.pipeline.block.block_callback import BuildCallbacksBlock
+from models.pipeline.block.block_optimizer import BuildOptimizersBlock, SerializeOptimizerBlock
+from models.pipeline.block.block_recordsampler import RecordNumSamplesBlock
 
 from tools.utils.type import sample_weights_type
 from tools.utils.ddp import is_local_rank_0
