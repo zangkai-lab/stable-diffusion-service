@@ -12,6 +12,7 @@ from models.model.model_dl import IDLModel
 from models.model.inference import IInference
 from models.model.train_state import TrainerState
 from models.config.train_config import TrainerConfig
+from models.model.custom import ModelWithCustomSteps, weighted_loss_score
 
 
 metric_dict: Dict[str, Type["IMetric"]] = {}
