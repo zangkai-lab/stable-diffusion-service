@@ -11,6 +11,7 @@ from models.model.model_dl import IDLModel
 from models.model.train_state import TrainerState
 from models.model.loss import ILoss
 from models.model.metrics import IMetric, MetricsOutputs
+from models.model.tqdm_setting import TqdmSettings
 from models.model.inference import IInference
 from models.data.data_loader import IDataLoader
 from models.data.data import IData
