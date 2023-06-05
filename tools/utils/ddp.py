@@ -16,3 +16,8 @@ def get_ddp_info() -> Optional[DDPInfo]:
         local_rank = int(os.environ["LOCAL_RANK"])
         return DDPInfo(rank, world_size, local_rank)
     return None
+
+
+def is_local_rank_0() -> bool:
+    ddp_info = get_ddp_info()
+    return ddp_info is None or ddp_info.local_rank == 0

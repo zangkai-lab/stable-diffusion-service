@@ -9,6 +9,9 @@ from tools.utils.copy import shallow_copy_dict
 from tools.utils.safe import safe_execute
 from tools.utils.ddp import get_ddp_info
 
+from models.data.data import IData
+from models.train.train_config import DLConfig
+
 
 class Block(IBlock, ABC):
     """

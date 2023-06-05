@@ -5,6 +5,7 @@ from PIL import Image  # Python图像处理库, 图像处理功能
 from io import BytesIO
 
 from tools.utils.type import arr_type
+from tools.utils.is_type import is_int, is_float
 
 
 def to_uint8(normalized_img: arr_type) -> arr_type:
@@ -34,3 +35,19 @@ def get_normalized_arr_from_diffusion(img_arr: np.ndarray) -> np.ndarray:
 # 将diffusion的输出结果转换为字节序列
 def get_bytes_from_diffusion(img_arr: np.ndarray) -> bytes:
     return np_to_bytes(get_normalized_arr_from_diffusion(img_arr))
+
+
+def to_standard(arr: np.ndarray) -> np.ndarray:
+    if is_int(arr):
+        arr = arr.astype(np.int64)
+    elif is_float(arr):
+        arr = arr.astype(np.float32)
+    return arr
+
+
+def to_torch(arr: np.ndarray) -> torch.Tensor:
+    return torch.from_numpy(to_standard(arr))
+
+
+def to_numpy(tensor: torch.Tensor) -> np.ndarray:
+    return tensor.detach().cpu().numpy()

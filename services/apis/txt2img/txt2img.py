@@ -7,7 +7,7 @@ from .init import init_sd
 
 from services.pooling.pool_apis import api_pool
 from tools.enum.apis import APIs
-from tools.utils.to import get_bytes_from_diffusion
+from tools.utils.to_type import get_bytes_from_diffusion
 
 
 def txt2img_initialize() -> None:

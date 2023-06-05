@@ -1,18 +1,40 @@
 import numpy as np
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Generic, Optional, Type, TypeVar
+from typing import Any, Dict, Generic, Optional, Type, TypeVar, Tuple
 
 from models.data.dataset import IDataset
-from models.data.data_config import DataConfig
+from models.data.data_config import DataConfig, DataProcessorConfig
+from models.data.data_processor import DataProcessor
+from models.data.data_bundle import DataBundle
+from models.data.data_loader import TDataLoaders
 
 from tools.bases.serializable import ISerializableArrays
-from tools.utils.type import np_dict_type
+from tools.utils.type import np_dict_type, data_type, sample_weights_type
 
 
 data_dict: Dict[str, Type["IData"]] = {}
 
 TData = TypeVar("TData", bound="IData", covariant=True)
+TSplitSW = Tuple[Optional[np.ndarray], Optional[np.ndarray]]
+
+
+def norm_sw(sample_weights: Optional[np.ndarray]) -> Optional[np.ndarray]:
+    if sample_weights is None:
+        return None
+    return sample_weights / sample_weights.sum()
+
+
+def split_sw(sample_weights: sample_weights_type) -> TSplitSW:
+    if sample_weights is None:
+        train_weights = valid_weights = None
+    else:
+        if not isinstance(sample_weights, np.ndarray):
+            train_weights, valid_weights = sample_weights
+        else:
+            train_weights, valid_weights = sample_weights, None
+    train_weights, valid_weights = map(norm_sw, [train_weights, valid_weights])
+    return train_weights, valid_weights
 
 
 class IData(ISerializableArrays, Generic[TData], metaclass=ABCMeta):
