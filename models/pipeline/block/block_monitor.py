@@ -1,7 +1,7 @@
 from typing import List
 from models.pipeline.pipeline_base import Block
 from models.config.train_config import DLConfig
-from models.model.monitor.monitor_train import TrainerMonitor
+from models.model.trainer import TrainerMonitor
 from models.model.monitor.monitor_basic import BasicMonitor
 
 

@@ -8,8 +8,20 @@ from models.data.data import IData
 from models.pipeline.mixin.mixin_device import DeviceMixin
 from models.pipeline.mixin.mixin_evaluation import EvaluationMixin
 
+from models.pipeline.block.block_trainer import BuildTrainerBlock
+from models.pipeline.block.block_model import BuildModelBlock
+from models.pipeline.block.block_inference import BuildInferenceBlock
+from models.pipeline.block.block_serialize import SerializeDataBlock, SerializeModelBlock
+from models.pipeline.block.block_loss import BuildLossBlock
+from models.pipeline.block.block_metrics import BuildMetricsBlock
+from models.pipeline.block.block_workspace import PrepareWorkplaceBlock, prepare_workspace_from
+from models.pipeline.block.block_stateinfo import ExtractStateInfoBlock
+from models.pipeline.block.block_monitor import BuildMonitorsBlock
+from models.pipeline.block.block_callback import BuildCallbacksBlock
+
 from tools.utils.type import sample_weights_type
 from tools.utils.ddp import is_local_rank_0
+from tools.bases.serializable import Serializer
 
 
 class TrainingPipeline(

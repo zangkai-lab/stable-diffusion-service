@@ -1,7 +1,7 @@
 import math
 
 from typing import Optional
-from models.model.monitor.monitor_train import TrainerMonitor
+from models.model.trainer import TrainerMonitor
 
 
 @TrainerMonitor.register("basic")
