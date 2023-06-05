@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
 
-from typing import Any, ContextManager, Optional
+from torch.optim import Optimizer
+from typing import Any, ContextManager, Optional, Dict
 
 
 class mode_context:
@@ -95,3 +96,61 @@ class eval_context(mode_context):
             use_grad=use_grad,
             use_inference=use_inference,
         )
+
+
+class no_grad_context(torch.no_grad):
+    def __init__(self, *, enabled: bool):
+        super().__init__()
+        self.enabled = enabled
+
+    def __enter__(self) -> None:
+        if not self.enabled:
+            return
+        super().__enter__()
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        if not self.enabled:
+            return
+        super().__exit__(exc_type, exc_val, exc_tb)
+
+
+class toggle_optimizer:
+    """
+    Help focusing gradients on specific optimizer and recovering previous states
+
+    This is a context controller for requiring and only requiring grads for parameters
+    of the given optimizer at the beginning, and back to previous grads requiring states
+    at the end.
+
+    Examples
+    --------
+    >>> module = nn.Module()
+    >>> optimizer = torch.optim.Adam()
+    >>> with toggle_optimizer(module, optimizer):
+    >>>     pass  # do something
+
+    """
+
+    def __init__(self, m: nn.Module, optimizer: Optimizer, *, enabled: bool = True):
+        self.m = m
+        self.optimizer = optimizer
+        self.enabled = enabled
+        self.requires_grad: Dict[str, bool] = {}
+
+    def __enter__(self) -> None:
+        if not self.enabled:
+            return
+        self.requires_grad = {k: p.requires_grad for k, p in self.m.named_parameters()}
+        for p in self.m.parameters():
+            p.requires_grad = False
+        for group in self.optimizer.param_groups:
+            for p in group["params"]:
+                p.requires_grad = True
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        if not self.enabled:
+            return
+        for k, p in self.m.named_parameters():
+            requires_grad = self.requires_grad.get(k)
+            if requires_grad is not None:
+                p.requires_grad = requires_grad

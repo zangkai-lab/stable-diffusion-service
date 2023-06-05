@@ -6,6 +6,7 @@ from typing import List, Optional, Union
 from models.pipeline.pipeline_base import Pipeline, Block
 from models.data.data import IData
 from models.pipeline.mixin.mixin_device import DeviceMixin
+from models.pipeline.mixin.mixin_evaluation import EvaluationMixin
 
 from tools.utils.type import sample_weights_type
 from tools.utils.ddp import is_local_rank_0
@@ -14,7 +15,7 @@ from tools.utils.ddp import is_local_rank_0
 class TrainingPipeline(
     Pipeline,
     DeviceMixin,
-    _EvaluationMixin,
+    EvaluationMixin,
     metaclass=ABCMeta,
 ):
     is_built = False

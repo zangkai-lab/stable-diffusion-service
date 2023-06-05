@@ -4,8 +4,8 @@ import numpy as np
 from PIL import Image  # Python图像处理库, 图像处理功能
 from io import BytesIO
 
-from tools.utils.type import arr_type
-from tools.utils.is_type import is_int, is_float
+from tools.utils.type import arr_type, np_dict_type, tensor_dict_type
+from tools.utils.is_type import is_int, is_float, is_string
 
 
 def to_uint8(normalized_img: arr_type) -> arr_type:
@@ -51,3 +51,10 @@ def to_torch(arr: np.ndarray) -> torch.Tensor:
 
 def to_numpy(tensor: torch.Tensor) -> np.ndarray:
     return tensor.detach().cpu().numpy()
+
+
+def np_batch_to_tensor(np_batch: np_dict_type) -> tensor_dict_type:
+    return {
+        k: v if not isinstance(v, np.ndarray) or is_string(v) else to_torch(v)
+        for k, v in np_batch.items()
+    }
