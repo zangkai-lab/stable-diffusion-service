@@ -2,7 +2,7 @@ from typing import Any
 
 from models.config.train_config import DLConfig
 from models.data.data_loader import IDataLoader
-from models.model.metrics import MetricsOutputs
+from models.model.metrics import MetricsOutputs, get_metrics
 from models.pipeline.mixin.mixin_inference import InferenceMixin
 from models.pipeline.pipeline_evaluation import IEvaluationPipeline
 from models.pipeline.block.block_loss import BuildLossBlock
