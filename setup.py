@@ -33,5 +33,6 @@ setup(
         "onnx-simplifier",
         "accelerate",
         "tqdm",
+        "dill"
     ],
 )
