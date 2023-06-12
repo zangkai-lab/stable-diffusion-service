@@ -13,6 +13,7 @@ from models.model.custom import ModelWithCustomSteps, CustomTrainStepLoss
 from models.model.metrics import MetricsOutputs
 
 from models.model.diffusion.ae.lpips import LPIPS
+from models.model.discriminators.nlayer import NLayerDiscriminator
 
 
 # 相似度判别模型

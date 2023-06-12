@@ -2,7 +2,7 @@ import math
 import torch
 import torch.nn as nn
 
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, List, Dict, Type
 from torch.nn import Module
 from torch import Tensor
 import torch.nn.functional as F
@@ -10,6 +10,9 @@ import torch.nn.functional as F
 from models.model.blocks.hijacks import HijackConv1d
 from models.model.blocks.hijacks import HijackConv2d
 from models.model.blocks.hijacks import HijackConv3d
+
+from models.model.blocks.activations import Activation
+from models.model.norms import NormFactory
 
 
 def conv_nd(n: int, *args: Any, **kwargs: Any) -> Module:
@@ -166,3 +169,119 @@ class Conv2d(Module):
             f"stride={self.stride}, padding={self.padding}, dilation={self.dilation}, "
             f"bias={self.bias is not None}, demodulate={self.demodulate}"
         )
+
+
+class CABlock(Module):
+    """Coordinate Attention"""
+
+    def __init__(self, num_channels: int, reduction: int = 32):
+        super().__init__()
+        self.pool_h = nn.AdaptiveAvgPool2d((None, 1))
+        self.pool_w = nn.AdaptiveAvgPool2d((1, None))
+        latent_channels = max(8, num_channels // reduction)
+        self.conv_blocks = nn.Sequential(
+            *get_conv_blocks(
+                num_channels,
+                latent_channels,
+                kernel_size=1,
+                stride=1,
+                norm_type="batch",
+                activation=Activation.make("h_swish"),
+                padding=0,
+            )
+        )
+
+        conv2d = lambda: Conv2d(
+            latent_channels,
+            num_channels,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+        )
+        self.conv_h = conv2d()
+        self.conv_w = conv2d()
+
+    def forward(self, net: Tensor) -> Tensor:
+        original = net
+
+        n, c, h, w = net.shape
+        net_h = self.pool_h(net)
+        net_w = self.pool_w(net).transpose(2, 3)
+
+        net = torch.cat([net_h, net_w], dim=2)
+        net = self.conv_blocks(net)
+
+        net_h, net_w = torch.split(net, [h, w], dim=2)
+        net_w = net_w.transpose(2, 3)
+
+        net_h = self.conv_h(net_h).sigmoid()
+        net_w = self.conv_w(net_w).sigmoid()
+
+        return original * net_w * net_h
+
+
+class ECABlock(Module):
+    """Efficient Channel Attention"""
+
+    def __init__(self, kernel_size: int = 3):
+        super().__init__()
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        self.conv = nn.Conv1d(
+            1,
+            1,
+            kernel_size=kernel_size,
+            padding=(kernel_size - 1) // 2,
+            bias=False,
+        )
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, net: Tensor) -> Tensor:
+        w = self.avg_pool(net).squeeze(-1).transpose(-1, -2)
+        w = self.conv(w).transpose(-1, -2).unsqueeze(-1)
+        w = self.sigmoid(w)
+        return w * net
+
+
+def get_conv_blocks(
+    in_channels: int,
+    out_channels: int,
+    kernel_size: int,
+    stride: int,
+    *,
+    bias: bool = True,
+    demodulate: bool = False,
+    norm_type: Optional[str] = None,
+    norm_kwargs: Optional[Dict[str, Any]] = None,
+    ca_reduction: Optional[int] = None,
+    eca_kernel_size: Optional[int] = None,
+    activation: Optional[Union[str, Module]] = None,
+    conv_base: Type["Conv2d"] = Conv2d,
+    pre_activate: bool = False,
+    **conv2d_kwargs: Any,
+) -> List[Module]:
+    conv = conv_base(
+        in_channels=in_channels,
+        out_channels=out_channels,
+        kernel_size=kernel_size,
+        stride=stride,
+        bias=bias,
+        demodulate=demodulate,
+        **conv2d_kwargs,
+    )
+    blocks: List[Module] = []
+    if not pre_activate:
+        blocks.append(conv)
+    if not demodulate:
+        factory = NormFactory(norm_type)
+        factory.inject_to(out_channels, norm_kwargs or {}, blocks)
+    if eca_kernel_size is not None:
+        blocks.append(ECABlock(kernel_size))
+    if activation is not None:
+        if isinstance(activation, str):
+            activation = Activation.make(activation)
+        blocks.append(activation)
+    if ca_reduction is not None:
+        blocks.append(CABlock(out_channels, ca_reduction))
+    if pre_activate:
+        blocks.append(conv)
+    return blocks
