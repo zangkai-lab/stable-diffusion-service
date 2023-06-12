@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from abc import abstractmethod, ABCMeta
-from typing import Optional, List, Dict, Any, Callable, Tuple
+from typing import Optional, List, Dict, Any, Callable, Tuple, Union
 from torch import Tensor
 from torch.autograd import grad
 
@@ -11,8 +11,10 @@ from tools.utils.type import tensor_dict_type
 from tools.utils.device import get_device
 
 from models.model.diffusion.generator import GaussianGeneratorMixin
-from models.model.custom import ModelWithCustomSteps, CustomTrainStepLoss
+from models.model.custom import ModelWithCustomSteps, CustomTrainStepLoss, CustomTrainStep
 from models.model.metrics import MetricsOutputs
+from models.model.constant import INPUT_KEY
+from models.model.train_state import TrainerState
 
 from models.model.diffusion.ae.lpips import LPIPS
 from models.model.discriminators.nlayer import NLayerDiscriminator
@@ -139,6 +141,48 @@ class AutoEncoderLPIPSWithDiscriminator(nn.Module, metaclass=ABCMeta):
 
 
 err_fmt = "`loss` is not initialized for `{}`"
+
+
+class GeneratorStep(CustomTrainStep):
+    def loss_fn(
+        self,
+        m: "IAutoEncoder",
+        state: Optional[TrainerState],
+        batch: tensor_dict_type,
+        forward_results: Union[tensor_dict_type, List[tensor_dict_type]],
+        **kwargs: Any,
+    ) -> CustomTrainStepLoss:
+        if m.loss is None:
+            raise ValueError(err_fmt.format(m.__class__.__name__))
+        return m.loss.get_generator_loss(
+            batch,
+            forward_results,
+            step=None if state is None else state.step,
+            last_layer=m.generator.decoder.head[-1].weight,  # type: ignore
+        )
+
+
+class DiscriminatorStep(CustomTrainStep):
+    def should_skip(self, m: "IAutoEncoder", state: TrainerState) -> bool:
+        if m.loss is None:
+            raise ValueError(err_fmt.format(m.__class__.__name__))
+        return state.step < m.loss.d_loss_start_step
+
+    def loss_fn(
+        self,
+        m: "IAutoEncoder",
+        state: Optional["TrainerState"],
+        batch: tensor_dict_type,
+        forward_results: Union[tensor_dict_type, List[tensor_dict_type]],
+        **kwargs: Any,
+    ) -> CustomTrainStepLoss:
+        if m.loss is None:
+            raise ValueError(err_fmt.format(m.__class__.__name__))
+        return m.loss.get_discriminator_loss(
+            batch[INPUT_KEY],
+            forward_results[PREDICTIONS_KEY],  # type: ignore
+            step=None if state is None else state.step,
+        )
 
 
 class IAutoEncoder(GaussianGeneratorMixin, ModelWithCustomSteps, metaclass=ABCMeta):
