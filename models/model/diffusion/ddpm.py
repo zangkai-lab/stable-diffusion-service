@@ -39,9 +39,12 @@ from models.model.diffusion.utils import CONTROL_HINT_KEY
 from models.model.diffusion.utils import CONTROL_HINT_START_KEY
 from models.model.diffusion.utils import extract_to
 from models.model.diffusion.utils import get_timesteps
+from models.model.diffusion.utils import is_misc_key
 from models.model.diffusion.generator import GaussianGeneratorMixin
+from models.model.diffusion.common import EMA
 
-from models.model.sampler.sampler import ISampler
+from models.model.controlnet.controlnet import ControlNet
+from models.model.sampler.sampler import ISampler, IQSampler
 
 
 def make_beta_schedule(
@@ -157,6 +160,31 @@ class DDPMStep(CustomTrainStep):
     ) -> None:
         if m.training and m.unet_ema is not None:
             m.unet_ema()
+
+
+class DDPMQSampler(IQSampler):
+    sqrt_alphas: Tensor
+    sqrt_one_minus_alphas: Tensor
+
+    def q_sample(
+        self,
+        net: Tensor,
+        timesteps: Tensor,
+        noise: Optional[Tensor] = None,
+    ) -> Tensor:
+        self.sqrt_alphas = self.sqrt_alphas.to(net)
+        self.sqrt_one_minus_alphas = self.sqrt_one_minus_alphas.to(net)
+        num_dim = len(net.shape)
+        w_net = extract_to(self.sqrt_alphas, timesteps, num_dim)
+        w_noise = extract_to(self.sqrt_one_minus_alphas, timesteps, num_dim)
+        if noise is None:
+            noise = torch.randn_like(net)
+        net = w_net * net + w_noise * noise
+        return net
+
+    def reset_buffers(self, sqrt_alpha: Tensor, sqrt_one_minus_alpha: Tensor) -> None:  # type: ignore
+        self.sqrt_alphas = sqrt_alpha
+        self.sqrt_one_minus_alphas = sqrt_one_minus_alpha
 
 
 @ModelWithCustomSteps.register("ddpm")

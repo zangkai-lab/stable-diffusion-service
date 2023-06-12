@@ -18,6 +18,10 @@ CONTROL_HINT_KEY = "hint"
 CONTROL_HINT_START_KEY = "hint_start"
 
 
+def is_misc_key(key: str) -> bool:
+    return key in (CONCAT_KEY, CONTROL_HINT_KEY, CONTROL_HINT_START_KEY)
+
+
 def extract_to(array: Tensor, indices: Tensor, num_dim: int) -> Tensor:
     b = indices.shape[0]
     out = array.gather(-1, indices).contiguous()
