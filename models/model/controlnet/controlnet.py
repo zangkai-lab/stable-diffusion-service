@@ -2,6 +2,24 @@ import torch.nn as nn
 
 from torch import Tensor
 from typing import Optional, Tuple, Dict, Any, List
+from abc import ABCMeta, abstractmethod
+
+from models.model.blocks.hijacks import HijackLinear
+from models.model.blocks.convs.basic import conv_nd
+from models.model.blocks.convs.residual import ResidualBlockWithTimeEmbedding
+from models.model.blocks.attentions import MultiHeadSpatialAttention
+from models.model.blocks.utils import ResDownsample, zero_module
+from models.model.blocks.mixed_stacks.api import SpatialTransformer
+
+
+class TimestepBlock(nn.Module, metaclass=ABCMeta):
+    @abstractmethod
+    def forward(self, net: Tensor, time_net: Tensor) -> Tensor:
+        pass
+
+
+class ResBlock(ResidualBlockWithTimeEmbedding, TimestepBlock):
+    pass
 
 
 class ControlNet(nn.Module):
