@@ -1,9 +1,11 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from abc import abstractmethod, ABCMeta
 from typing import Optional, List, Dict, Any, Callable, Tuple
 from torch import Tensor
+from torch.autograd import grad
 
 from tools.utils.type import tensor_dict_type
 from tools.utils.device import get_device
@@ -14,6 +16,20 @@ from models.model.metrics import MetricsOutputs
 
 from models.model.diffusion.ae.lpips import LPIPS
 from models.model.discriminators.nlayer import NLayerDiscriminator
+
+
+def d_hinge_loss(real: Tensor, fake: Tensor) -> Tensor:
+    l_real = torch.mean(F.relu(1.0 - real))
+    l_fake = torch.mean(F.relu(1.0 + fake))
+    loss = 0.5 * (l_real + l_fake)
+    return loss
+
+
+def d_vanilla_loss(real: Tensor, fake: Tensor) -> Tensor:
+    l_real = torch.mean(F.softplus(-real))
+    l_fake = torch.mean(F.softplus(fake))
+    loss = 0.5 * (l_real + l_fake)
+    return loss
 
 
 # 相似度判别模型
