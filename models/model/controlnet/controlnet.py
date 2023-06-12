@@ -1,3 +1,5 @@
+import torch
+import math
 import torch.nn as nn
 
 from torch import Tensor
@@ -10,6 +12,54 @@ from models.model.blocks.convs.residual import ResidualBlockWithTimeEmbedding
 from models.model.blocks.attentions import MultiHeadSpatialAttention
 from models.model.blocks.utils import ResDownsample, zero_module
 from models.model.blocks.mixed_stacks.api import SpatialTransformer
+
+
+class TimestepBlock(nn.Module, metaclass=ABCMeta):
+    @abstractmethod
+    def forward(self, net: Tensor, time_net: Tensor) -> Tensor:
+        pass
+
+
+class TimestepAttnSequential(TimestepBlock, nn.Sequential, metaclass=ABCMeta):
+    def forward(
+        self,
+        net: Tensor,
+        time_net: Tensor,
+        context: Optional[Tensor] = None,
+    ) -> Tensor:
+        for layer in self:
+            if isinstance(layer, TimestepBlock):
+                net = layer(net, time_net)
+            elif isinstance(layer, SpatialTransformer):
+                net = layer(net, context)
+            else:
+                net = layer(net)
+        return net
+
+
+def timestep_embedding(
+    # 1-D Tensor, shape=[B]
+    timesteps: Tensor,
+    output_dim: int,
+    *,
+    dtype: torch.dtype,
+    max_period: int = 10000,
+    repeat_only: bool = False,
+) -> Tensor:
+    if repeat_only:
+        return timesteps[..., None].repeat_interleave(output_dim, dim=1)
+    half = output_dim // 2
+    frequency = torch.exp(
+        -math.log(max_period)
+        * torch.arange(start=0, end=half, dtype=torch.float32)
+        / half
+    ).to(device=timesteps.device)
+    args = timesteps[:, None].float() * frequency[None]
+    embedding = torch.cat([torch.cos(args), torch.sin(args)], dim=-1)
+    if output_dim % 2:
+        embedding = torch.cat([embedding, torch.zeros_like(embedding[:, :1])], dim=-1)
+    embedding = embedding.to(dtype)
+    return embedding
 
 
 class TimestepBlock(nn.Module, metaclass=ABCMeta):
