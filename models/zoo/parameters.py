@@ -1,0 +1,30 @@
+import os
+
+from typing import Any
+from typing import Dict
+from tools.bases.optbase import OPTBase
+
+
+class OPTClass(OPTBase):
+    cache_dir: str
+    external_dir: str
+    meta_settings: Dict[str, Any]
+
+    @property
+    def env_key(self) -> str:
+        return "CFLEARN_ENV"
+
+    @property
+    def defaults(self) -> Dict[str, Any]:
+        return dict(
+            cache_dir=os.path.join(os.path.expanduser("~"), ".cache", "carefree-learn"),
+            external_dir=os.path.join(os.path.expanduser("~"), ".cache", "external"),
+            meta_settings={},
+        )
+
+    @property
+    def data_cache_dir(self) -> str:
+        return os.path.join(self.cache_dir, "data")
+
+
+OPT = OPTClass()
