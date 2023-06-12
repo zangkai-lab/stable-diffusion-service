@@ -13,41 +13,6 @@ from models.model.custom import ModelWithCustomSteps, CustomTrainStepLoss
 from models.model.metrics import MetricsOutputs
 
 
-class LPIPS(nn.Module):
-    def __init__(self, use_dropout: bool = True):
-        from ..models.cv.encoder.backbone.core import Backbone
-
-        super().__init__()
-        self.scaling_layer = ScalingLayer()
-        self.backbone = Backbone("vgg16_full", pretrained=True, requires_grad=False)
-        make_mapping = lambda in_nc: ChannelMapping(in_nc, use_dropout)
-        self.out_channels = self.backbone.out_channels
-        self.mappings = nn.ModuleList(list(map(make_mapping, self.out_channels)))
-        self.load_pretrained()
-        set_requires_grad(self, False)
-
-    def load_pretrained(self) -> None:
-        ckpt = download_model("lpips")
-        self.load_state_dict(torch.load(ckpt), strict=False)
-
-    def forward(self, predictions: Tensor, target: Tensor) -> Tensor:
-        net0, net1 = map(self.scaling_layer, [predictions, target])
-        out0, out1 = map(self.backbone, [net0, net1])
-        loss = None
-        for i in range(len(self.out_channels)):
-            stage = f"stage{i}"
-            f0, f1 = out0[stage], out1[stage]
-            f0, f1 = map(normalize, [f0, f1])
-            diff = (f0 - f1) ** 2
-            squeezed = self.mappings[i](diff)
-            i_loss = spatial_average(squeezed, keepdim=True)
-            if loss is None:
-                loss = i_loss
-            else:
-                loss += i_loss
-        return loss
-
-
 # 相似度判别模型
 class AutoEncoderLPIPSWithDiscriminator(nn.Module, metaclass=ABCMeta):
     def __init__(
