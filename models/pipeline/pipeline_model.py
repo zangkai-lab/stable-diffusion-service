@@ -8,12 +8,14 @@ from tools.utils.device import is_cpu
 from tools.utils.device import empty_cuda_cache
 from tools.utils.device import get_device
 
+from models.pipeline.pipeline_train import TrainingPipeline
+from models.pipeline.pipeline_inference import DLInferencePipeline
 
 TPipeline = Union[TrainingPipeline, DLInferencePipeline]
 TAPI = TypeVar("TAPI", bound="ModelPipeline")
 
 
-class ModelPipeline:
+class APIMixin:
     m: nn.Module
     device: torch.device
     use_amp: bool  # 自动混合精度

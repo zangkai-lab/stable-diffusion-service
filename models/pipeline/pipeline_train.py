@@ -22,7 +22,9 @@ from models.pipeline.block.block_optimizer import BuildOptimizersBlock, Serializ
 from models.pipeline.block.block_recordsampler import RecordNumSamplesBlock
 from models.pipeline.block.block_report import ReportBlock
 from models.pipeline.block.block_training import TrainingBlock
+from models.pipeline.block.block_setdefault import SetDefaultsBlock, SetTrainerDefaultsBlock
 from models.pipeline.pipeline_base import PipelineTypes
+from models.pipeline.pipline_serializer import DLPipelineSerializer
 
 from tools.utils.type import sample_weights_type
 from tools.utils.ddp import is_local_rank_0

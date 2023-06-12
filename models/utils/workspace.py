@@ -5,6 +5,8 @@ from zipfile import ZipFile
 from tempfile import mkdtemp
 from typing import Any, Optional, ContextManager
 
+from models.model.constant import WORKSPACE_ENVIRON_KEY
+
 
 def get_workspace(folder: str, *, force_new: bool = False) -> ContextManager:
     class _:
@@ -33,3 +35,7 @@ def get_workspace(folder: str, *, force_new: bool = False) -> ContextManager:
                 shutil.rmtree(self.tmp_folder)
 
     return _()
+
+
+def get_environ_workspace() -> Optional[str]:
+    return os.environ.get(WORKSPACE_ENVIRON_KEY)

@@ -2,14 +2,27 @@ import os
 import torch
 import torch.nn as nn
 import numpy as np
+import torch.nn.functional as F
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, NamedTuple, Type, TypeVar, Callable
+from torch import Tensor
 
-from models.pipeline.pipeline_model import ModelPipeline
+from models.pipeline.pipeline_model import APIMixin
 from models.pooling.pool_weights import WeightsPool
 
+from tools.utils.type import tensor_dict_type
+from tools.utils.icopy import shallow_copy_dict
 
-class DiffusionAPI(ModelPipeline):
+
+T = TypeVar("T", bound="DiffusionAPI")
+
+
+class SizeInfo(NamedTuple):
+    factor: int
+    opt_size: int
+
+
+class DiffusionAPI(APIMixin):
     m: DDPM
     sampler: ISampler
     cond_model: Optional[nn.Module]
