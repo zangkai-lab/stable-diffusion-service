@@ -40,11 +40,14 @@ from models.model.diffusion.utils import CONTROL_HINT_START_KEY
 from models.model.diffusion.utils import extract_to
 from models.model.diffusion.utils import get_timesteps
 from models.model.diffusion.utils import is_misc_key
+from models.model.diffusion.utils import freeze
 from models.model.diffusion.generator import GaussianGeneratorMixin
 from models.model.diffusion.common import EMA
 
 from models.model.controlnet.controlnet import ControlNet
 from models.model.sampler.sampler import ISampler, IQSampler
+
+from models.zoo.core import DLZoo
 
 
 def make_beta_schedule(

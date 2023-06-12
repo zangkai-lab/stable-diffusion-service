@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 
 from torch import Tensor
 from typing import Union, Optional
@@ -59,3 +60,16 @@ def slerp(
     x2_part = (torch.sin(r2 * omega) / so).unsqueeze(1) * x2
     out[normal_mask] = x1_part + x2_part
     return out.view(b, *shape)
+
+
+def set_requires_grad(module: nn.Module, requires_grad: bool = False) -> None:
+    for param in module.parameters():
+        param.requires_grad = requires_grad
+
+
+def freeze(module: nn.Module) -> nn.Module:
+    module.eval()
+    # make sure that the module will never go back to `train` mode
+    module.train = lambda m, mode=True: m  # type: ignore
+    set_requires_grad(module, False)
+    return module
