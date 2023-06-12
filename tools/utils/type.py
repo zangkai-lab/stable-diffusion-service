@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import numpy as np
 
 from typing import Union
@@ -21,4 +22,10 @@ states_callback_type = Optional[Callable[[Any, Dict[str, Any]], Dict[str, Any]]]
 
 forward_results_type = Union[torch.Tensor, tensor_dict_type]
 losses_type = Union[torch.Tensor, tensor_dict_type]
+
+
+def get_dtype(m: nn.Module) -> torch.dtype:
+    params = list(m.parameters())
+    return torch.float32 if not params else params[0].dtype
+
 

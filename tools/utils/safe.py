@@ -3,8 +3,9 @@ inspect是Python的内建模块，它提供了很多有用的函数来帮助获�
 这些信息通常包括类的成员、文档字符串、源代码、规格以及函数的参数等
 """
 import inspect
+import math
 
-from typing import Any, Callable, Dict, Protocol, TypeVar
+from typing import Any, Callable, Dict, Protocol, TypeVar, Union
 
 
 TFnResponse = TypeVar("TFnResponse")
@@ -45,3 +46,16 @@ class Fn(Protocol):
 
 def safe_execute(fn: Fn, kw: Dict[str, Any], *, strict: bool = False) -> TFnResponse:
     return fn(**filter_kw(fn, kw, strict=strict))
+
+
+def get_num_positional_args(fn: Callable) -> Union[int, float]:
+    signature = inspect.signature(fn)
+    counter = 0
+    for param in signature.parameters.values():
+        if param.kind is inspect.Parameter.VAR_POSITIONAL:
+            return math.inf
+        if param.kind is inspect.Parameter.POSITIONAL_ONLY:
+            counter += 1
+        elif param.kind is inspect.Parameter.POSITIONAL_OR_KEYWORD:
+            counter += 1
+    return counter

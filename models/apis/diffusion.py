@@ -6,6 +6,7 @@ import torch.nn.functional as F
 
 from typing import Any, Dict, List, Optional, Tuple, Union, NamedTuple, Type, TypeVar, Callable
 from torch import Tensor
+from PIL import Image
 
 from models.pipeline.pipeline_model import APIMixin
 from models.pooling.pool_weights import WeightsPool
