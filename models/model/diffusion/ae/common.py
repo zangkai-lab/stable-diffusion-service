@@ -12,6 +12,8 @@ from models.model.diffusion.generator import GaussianGeneratorMixin
 from models.model.custom import ModelWithCustomSteps, CustomTrainStepLoss
 from models.model.metrics import MetricsOutputs
 
+from models.model.diffusion.ae.lpips import LPIPS
+
 
 # 相似度判别模型
 class AutoEncoderLPIPSWithDiscriminator(nn.Module, metaclass=ABCMeta):
