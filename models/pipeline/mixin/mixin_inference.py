@@ -5,7 +5,7 @@ from typing import Any, Callable, List, Optional, Type, Union
 
 from models.data.data import IData
 from models.pipeline.pipeline_base import Block
-from models.pipeline.pipeline_infer import TInferPipeline
+from models.pipeline.pipeline_inference import TInferPipeline
 from models.pipeline.block.block_model import BuildModelBlock
 from models.pipeline.block.block_inference import BuildInferenceBlock
 from models.pipeline.block.block_serialize import SerializeDataBlock, SerializeModelBlock

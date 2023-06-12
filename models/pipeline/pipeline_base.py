@@ -1,6 +1,7 @@
 from abc import ABC
 from collections import OrderedDict
 from typing import Any, Dict, List, Optional, Type
+from enum import Enum
 
 from tools.bases.pipeline import IBlock
 from tools.bases.pipeline import IPipeline
@@ -11,6 +12,13 @@ from tools.utils.ddp import get_ddp_info
 
 from models.data.data import IData
 from models.config.train_config import DLConfig
+
+
+class PipelineTypes(str, Enum):
+    DL_TRAINING = "dl.training"
+    ML_TRAINING = "ml.training"
+    DL_INFERENCE = "dl.inference"
+    DL_EVALUATION = "dl.evaluation"
 
 
 class Block(IBlock, ABC):

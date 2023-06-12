@@ -22,6 +22,10 @@ from models.pipeline.block.block_workspace import PrepareWorkplaceBlock
 from models.pipeline.block.block_serialize import SerializeModelBlock
 from models.model.saving import Saving
 
+from models.pipeline.pipeline_train import TrainingPipeline, DLTrainingPipeline
+from models.pipeline.pipeline_inference import DLInferencePipeline
+from models.pipeline.pipeline_evaluation import DLEvaluationPipeline
+
 
 class PackType(str, Enum):
     TRAINING = "training"

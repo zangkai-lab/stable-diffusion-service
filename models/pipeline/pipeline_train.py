@@ -22,6 +22,7 @@ from models.pipeline.block.block_optimizer import BuildOptimizersBlock, Serializ
 from models.pipeline.block.block_recordsampler import RecordNumSamplesBlock
 from models.pipeline.block.block_report import ReportBlock
 from models.pipeline.block.block_training import TrainingBlock
+from models.pipeline.pipeline_base import PipelineTypes
 
 from tools.utils.type import sample_weights_type
 from tools.utils.ddp import is_local_rank_0
@@ -114,3 +115,14 @@ class TrainingPipeline(
             DLPipelineSerializer.save(self, os.path.join(workspace, pipeline_folder))
         # return
         return self
+
+
+@Pipeline.register(PipelineTypes.DL_TRAINING)
+class DLTrainingPipeline(TrainingPipeline):
+    @property
+    def set_defaults_block(self) -> Block:
+        return SetDefaultsBlock()
+
+    @property
+    def set_trainer_defaults_block(self) -> Block:
+        return SetTrainerDefaultsBlock()
