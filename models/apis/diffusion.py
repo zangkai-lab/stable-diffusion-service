@@ -31,6 +31,8 @@ from models.model.diffusion.utils import CROSS_ATTN_KEY
 from models.model.diffusion.utils import CONTROL_HINT_KEY
 from models.model.diffusion.utils import CONTROL_HINT_START_KEY
 from models.model.diffusion.utils import get_timesteps
+from models.model.diffusion.ae.common import IAutoEncoder
+from models.model.diffusion.ldm import LDM
 
 
 T = TypeVar("T", bound="DiffusionAPI")
