@@ -1,5 +1,6 @@
 import os
 import torch
+import json
 import torch.nn as nn
 import numpy as np
 import torch.nn.functional as F
@@ -11,6 +12,8 @@ from PIL import Image
 
 from models.pipeline.pipeline_model import APIMixin
 from models.pooling.pool_weights import WeightsPool
+from filelock import FileLock
+from safetensors.torch import load_file
 
 from tools.utils.type import tensor_dict_type
 from tools.utils.icopy import shallow_copy_dict
@@ -20,7 +23,7 @@ from models.model.diffusion.ddpm import DDPM
 from models.model.sampler.sampler import ISampler
 from models.zoo.parameters import OPT
 from models.zoo.core import DLZoo
-from models.download.download_model import download_model
+from models.download.download_model import download_model, _get_file_size
 from models.model.blocks.utils import new_seed
 
 from models.model.constant import PREDICTIONS_KEY
@@ -33,6 +36,10 @@ from models.model.diffusion.utils import CONTROL_HINT_START_KEY
 from models.model.diffusion.utils import get_timesteps
 from models.model.diffusion.ae.common import IAutoEncoder
 from models.model.diffusion.ldm import LDM
+from models.apis.utils import convert
+from models.model.blocks.convs.basic import Conv2d
+
+from tools.enum.apis import get_sd_tag
 
 
 T = TypeVar("T", bound="DiffusionAPI")
@@ -41,6 +48,47 @@ T = TypeVar("T", bound="DiffusionAPI")
 class SizeInfo(NamedTuple):
     factor: int
     opt_size: int
+
+
+def _convert_external(m: "DiffusionAPI", tag: str, sub_folder: Optional[str]) -> str:
+    external_root = OPT.external_dir
+    if sub_folder is not None:
+        external_root = os.path.join(external_root, sub_folder)
+    lock_path = os.path.join(external_root, "load_external.lock")
+    lock = FileLock(lock_path)
+    with lock:
+        converted_sizes_path = os.path.join(external_root, "sizes.json")
+        sizes: Dict[str, int]
+        if not os.path.isfile(converted_sizes_path):
+            sizes = {}
+        else:
+            with open(converted_sizes_path, "r") as f:
+                sizes = json.load(f)
+        converted_path = os.path.join(external_root, f"{tag}_converted.pt")
+        v_size = sizes.get(tag)
+        f_size = (
+            None
+            if not os.path.isfile(converted_path)
+            else _get_file_size(converted_path)
+        )
+        if f_size is None or v_size != f_size:
+            if f_size is not None:
+                print(f"> '{tag}' has been converted but size mismatch")
+            print(f"> converting external weights '{tag}'")
+            model_path = os.path.join(external_root, f"{tag}.ckpt")
+            if not os.path.isfile(model_path):
+                st_path = os.path.join(external_root, f"{tag}.safetensors")
+                if not os.path.isfile(st_path):
+                    raise FileNotFoundError(f"cannot find '{tag}'")
+                torch.save(load_file(st_path), model_path)
+
+            d = convert(model_path, m, load=False)
+
+            torch.save(d, converted_path)
+            sizes[tag] = _get_file_size(converted_path)
+        with open(converted_sizes_path, "w") as f:
+            json.dump(sizes, f)
+        return converted_path
 
 
 class DiffusionAPI(APIMixin):

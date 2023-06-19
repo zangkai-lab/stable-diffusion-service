@@ -28,6 +28,10 @@ class FileInfo(NamedTuple):
     download_url: Optional[str] = None
 
 
+def _get_file_size(path: str) -> int:
+    return os.stat(path).st_size
+
+
 def check_available(tag: str, repo: str, name: str) -> Optional[FileInfo]:
     with open(os.path.join(os.path.dirname(__file__), "available.json"), "r") as f:
         available = json.load(f)
@@ -98,3 +102,14 @@ def download_model(
     if root is None:
         root = os.path.join(OPT.cache_dir, "models")
     return download("checkpoints", "pretrained-models", name, root, "pt")
+
+
+def download_static(
+    name: str,
+    *,
+    extension: str,
+    root: Optional[str] = None,
+) -> str:
+    if root is None:
+        root = os.path.join(OPT.cache_dir, "static")
+    return download("static", "pretrained-models", name, root, extension)

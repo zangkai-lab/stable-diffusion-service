@@ -33,6 +33,8 @@ setup(
         "onnx-simplifier",
         "accelerate",
         "tqdm",
-        "dill"
+        "dill",
+        "filelock",
+        "safetensors",
     ],
 )
